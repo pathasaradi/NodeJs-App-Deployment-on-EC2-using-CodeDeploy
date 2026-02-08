@@ -5,15 +5,13 @@ phases:
     commands:
       - echo Logging in to Amazon ECR
       - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 338034595180.dkr.ecr.us-west-2.amazonaws.com
-      - IMAGE_TAG=latest
 
   build:
     commands:
       - echo Build started
-      - ls -la
       - docker build -t bupa-stg-v2-php .
 
   post_build:
     commands:
-      - docker tag bupa-stg-v2-php-ecr:latest 338034595180.dkr.ecr.us-west-2.amazonaws.com/bupa-stg-v2-php-ecr:latest
-      - docker push 338034595180.dkr.ecr.us-west-2.amazonaws.com/bupa-stg-v2-php-ecr:lates
+      - docker tag bupa-stg-v2-php:latest 338034595180.dkr.ecr.us-west-2.amazonaws.com/bupa-stg-v2-php-ecr:latest
+      - docker push 338034595180.dkr.ecr.us-west-2.amazonaws.com/bupa-stg-v2-php-ecr:latest
