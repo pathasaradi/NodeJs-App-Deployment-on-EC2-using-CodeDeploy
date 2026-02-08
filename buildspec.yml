@@ -1,16 +1,30 @@
 version: 0.2
 
 phases:
-  install: 
-    runtime-versions:
-      nodejs: 10
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region us-west-2 |
+        docker login --username AWS --password-stdin 548017502343.dkr.ecr.us-west-2.amazonaws.com
+
+      - REPOSITORY_URI=548017502343.dkr.ecr.us-west-2.amazonaws.com/bupa-stg-v2-php
+      - IMAGE_TAG=latest
+
   build:
     commands:
-      - echo "Package & Dependicies are getting installed"
-      - npm -f install
-      - echo "Packages have been installed"
-      - echo "Storing Build Artifact to the Location"
+      - echo Build started on `date`
+      - docker build -t bupa-stg-v2-php .
+      - docker tag bupa-stg-v2-php:latest $REPOSITORY_URI:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo Pushing image to ECR...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Creating imagedefinitions.json...
+      - printf '[{"name":"bupa-stg-v2-php","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - ls -la
+
 artifacts:
-  type: zip
-  paths:
-    - '*'
+  files:
+    - imagedefinitions.json
